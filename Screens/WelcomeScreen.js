@@ -28,7 +28,7 @@ const WelcomeScreen = (props) => {
         await AsyncStorage.setItem('user', JSON.stringify(user));
         await AsyncStorage.setItem('data', JSON.stringify(data));
         // redict to HomeScreen avec les données de l'utilisateur en props
-        navigation.navigate('Home', { user, data });
+        navigation.navigate('Home');
       }
     }
   }
@@ -48,7 +48,7 @@ const WelcomeScreen = (props) => {
             title="Login"
             onPress={()=>handleSignIn()}
             style={styles.button2}>
-            <Icon name="logo-google" size={20} color="white" />
+            <Icon name="logo-google" size={20} color="black" />
             <Text style={styles.buttonText2}> Se connecter avec Google</Text></TouchableOpacity>
         </View>
         <Text style={styles.footer}>© 2023 - Lifes Bêta</Text>
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: 'white',
+    color: 'black',
     top: -30,
     fontSize: 34,
     fontWeight: 600,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    color: 'white',
+    color: 'black',
     top: -30,
     fontWeight: 400,
     fontSize: 16,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: '#bcbcbc',
     width: 310,
     padding: 19,
     justifyContent: 'center',
@@ -129,14 +129,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   buttonText2: {
-    color: 'white',
+    color: 'black',
     fontWeight: 600,
     fontSize: 16,
     lineHeight: 20,
   },
 
   footer: {
-    color: 'white',
+    color: 'black',
     fontWeight: 400,
     fontSize: 12,
 

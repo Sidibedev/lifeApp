@@ -5,18 +5,18 @@ import React from 'react'
 
 const BigBox = ({  title, image,onBoxPress}) => {
     return (
-        <TouchableOpacity onPress={onBoxPress} style={{ borderRadius: 20, overflow: 'hidden', backgroundColor:'red',marginBottom: 20,marginTop: 5 }}>
+        <View style={{ borderRadius: 20, overflow: 'hidden',marginBottom: 20,marginTop: 5, width: '100%'  }}>
             <ImageBackground source={image} style={styles.container}>
                 <View style={styles.row1}>
                     <Text style={styles.title}>{title}</Text>
                 </View>
                 <View style={styles.row2}>
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity onPress={onBoxPress} style={styles.button}>
                         <Text style={styles.titleButton}>Lire plus</Text>
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
-        </TouchableOpacity>
+        </View>
     )
 }
 
@@ -24,18 +24,16 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'column',
         borderRadius: 100,
-        width: 370,
+        width: "100%",
         height: 400,
-        paddingHorizontal: 5,
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 5,
     },
     row1: {
-        flex: 1,
+        flex: 1.5,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
         alignItems: 'center',
     },
 
@@ -46,7 +44,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 25,
         marginLeft: 30,
-        justifyContent: 'start',
         alignItems: "flex-end",
     },
 

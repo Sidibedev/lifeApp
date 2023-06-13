@@ -34,9 +34,10 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
 
     if (disabled) {
         return (
-            <TouchableOpacity onPress={onBoxPress}>
-                <ImageBackground source={require('../assets/locked.png')} style={[styles.container, { backgroundColor: '#24252B' }]}>
-                    <View style={styles.row1}>
+            
+                <ImageBackground ssource={require('../assets/locked.png')} style={[styles.container, { backgroundColor: '#24252B' }]}>
+                <TouchableOpacity onPress={onBoxPress} >
+                <View style={styles.row1}>
                         <View style={styles.minilogo}>
                             <Icon name={icon} size={30} color={colorIcon} />
                         </View>
@@ -69,13 +70,16 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
                             <Text style={styles.title}>-</Text>
                         </TouchableOpacity>
                     </View>
+                    </TouchableOpacity>
                 </ImageBackground>
-            </TouchableOpacity>
         );
     }
 
     return (
-        <View style={[styles.container1, { backgroundColor: '#24252B' }]}>
+        <View style={[styles.container1,
+        {
+            backgroundColor: 'white',
+        }]}>
             <View style={styles.row1}>
                 <View style={styles.minilogo}>
                     <Icon name={icon} size={30} color={colorIcon} />
@@ -88,8 +92,7 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
                     width={10}
                     fill={percentage} // pourcentage de remplissage
                     tintColor={colorIcon} // couleur de la barre de progression
-                    onAnimationComplete={() => console.log('onAnimationComplete')}
-                    backgroundColor="#3d5875">
+                    backgroundColor="#bcbcbc">
                     {
                         (fill) => (
                             <Text style={styles.percentageTitle}>
@@ -114,12 +117,13 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
 };
 
 
+
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'column',
         marginTop: 0,
         borderRadius: 20,
-        width: 175,
+        width: '50%',
         height: 250,
         paddingHorizontal: 5,
         justifyContent: 'center',
@@ -132,19 +136,30 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         marginTop: 30,
         borderRadius: 20,
-        width: 175,
+        width: '48%',
         height: 250,
         paddingHorizontal: 5,
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 5,
+
+        // add shadow and elevation
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+
+        // Pour Android
+        elevation: 2,
     },
 
     row1: {
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
         alignItems: 'center',
     },
 
@@ -180,7 +195,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         margin: 10,
-        backgroundColor: '#363841',
+        backgroundColor: '#eeeeee',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -188,7 +203,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: 'white',
+        color: '#060606',
     },
 
     button: {
@@ -196,7 +211,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         margin: 10,
-        backgroundColor: '#363841',
+        backgroundColor: '#eeeeee',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -205,12 +220,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: 'center',
         fontWeight: 'bold',
-        color: 'white',
+        color: '#060606',
     },
     percentageSubtitle: {
         textAlign: 'center',
         fontSize: 9,
-        color: 'white',
+        color: '#060606',
     },
 
 

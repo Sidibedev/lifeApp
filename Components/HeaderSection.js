@@ -34,7 +34,6 @@ constantesContainer: {
     paddingVertical : 5,
 
     paddingLeft: 5,
-    paddingTop: 35,
   },
 
   headerConstantes :
