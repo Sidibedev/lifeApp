@@ -6,17 +6,34 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 
-const Box = () => {
+const Box = ({ icon, measure, number, title, color,onPress }) => {
+
+    const [finalColor, setFinalColor] = useState(color)
+
+    const handleColor = () => {
+        if (number === 0)
+            setFinalColor('lightgrey')
+        else
+            setFinalColor(color)
+    }
+
+    useEffect(() => {
+        handleColor()
+    }, [number])
 
     return (
-        <TouchableOpacity style={[styles.container, { backgroundColor: 'red' }]}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, { backgroundColor: finalColor }]}>
             <View style={styles.row1}>
+                <View style={styles.minilogo}>
+                    <Icon name={icon} size={30} color={finalColor} />
+                </View>
             </View>
             <View style={styles.row2}>
-                
+                <Text style={styles.number}>{number}</Text>
+                <Text style={styles.measure}>{measure}</Text>
             </View>
             <View style={styles.row3}>
-                
+                <Text style={styles.title}>{title}</Text>
             </View>
         </TouchableOpacity>
     )
@@ -25,42 +42,42 @@ const Box = () => {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'column',
-        marginTop: 30,
+        paddingLeft: 10,
         borderRadius: 20,
-        width: 175,
+        width: '100%',
         height: 170,
         paddingHorizontal: 5,
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 5,
+        marginBottom: 15,
     },
     row1: {
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'flex-start',
     },
 
     row2: {
-        flex: 1,
+        flex: 1.2,
         width: '100%',
+        alignItems:'flex-start',
+        alignContent:'flex-start',
         flexDirection: 'row',
-        justifyContent: 'flex-start',
     },
 
     row3: {
-        flex: 1,
+        flex: 0.4,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'flex-start',
 
         marginBottom: 15,
     },
 
     minilogo: {
-        top: 5,
-        width: 65,
-        height: 60,
+        top: '5%',
+        width: '40%',
+        height: '90%',
         borderRadius: 15,
         backgroundColor: 'white',
         alignItems: 'center',
@@ -69,17 +86,14 @@ const styles = StyleSheet.create({
     },
 
     number: {
-        marginTop: 15,
-        height: 50,
+        height: '100%',
         marginLeft: 8,
         fontWeight: 'bold',
-        fontSize: 50,
-        paddingBottom: 5,
+        fontSize: 53,
         color: 'white',
     },
 
     title: {
-        top: 25,
         fontSize: 14,
         marginLeft: 8,
         paddingRight: 11,
@@ -90,7 +104,7 @@ const styles = StyleSheet.create({
         marginTop: 30,
         height: 50,
         marginLeft: 8,
-        fontSize: 19,
+        fontSize: 15,
         paddingRight: 11,
         color: 'white',
     },

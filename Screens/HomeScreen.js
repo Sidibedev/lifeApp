@@ -1,23 +1,119 @@
-import { TextInput, View, Alert, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, TouchableHighlight, Button, StatusBar } from 'react-native';
-import React, { useState } from 'react'
+import { TextInput, View, Alert, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, TouchableHighlight, Button, StatusBar, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import Modal from "react-native-modal";
+import { Picker } from '@react-native-picker/picker';
+import Icon from 'react-native-vector-icons/Ionicons';
+import DropDownPicker from 'react-native-dropdown-picker';
+
 
 //Import Components
+import BigBox from '../Components/BigBox';
 import ArticleBox from '../Components/ArticleBox'
 import Box from '../Components/Box'
 import HeaderSection from '../Components/HeaderSection'
 import Notification from '../Components/Notification'
-import { ScrollView } from 'react-native-gesture-handler';
+import GoogleFit, { Scopes } from 'react-native-google-fit';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const HomeScreen = (props) => {
   const navigation = useNavigation();
+  const [steps, setSteps] = useState(0);
+  const [calories, setCalories] = useState(0);
+  const [Weight, setWeight] = useState(0);
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: 'Java', value: 'java' },
+    { label: 'JavaScript', value: 'js' }
+  ]);
+
+  const options = {
+    scopes: [
+      Scopes.FITNESS_ACTIVITY_READ,
+      Scopes.FITNESS_ACTIVITY_WRITE,
+      Scopes.FITNESS_BODY_READ,
+      Scopes.FITNESS_BODY_WRITE,
+      Scopes.FITNESS_BLOOD_PRESSURE_READ,
+      Scopes.FITNESS_BLOOD_PRESSURE_WRITE,
+      Scopes.FITNESS_BLOOD_GLUCOSE_READ,
+      Scopes.FITNESS_BLOOD_GLUCOSE_WRITE,
+      Scopes.FITNESS_NUTRITION_WRITE,
+      Scopes.FITNESS_SLEEP_READ,
+    ],
+  };
+  const dates = {
+    startDate: "2021-01-01T00:00:17.971Z", // required ISO8601Timestamp
+    endDate: new Date().toISOString() // required ISO8601Timestamp
+  };
+
 
   //Log Checker
+  // Fonction pour récupérer les données de pas quotidiens
+  const getStepCountData = async () => {
+    // Autoriser l'accès à Google Fit
+    await GoogleFit.authorize(options);
+
+    // Définir les dates de début et de fin
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // Récupérer les données des 7 derniers jours
+    const endDate = new Date();
+
+    // Récupérer les données de pas quotidiens
+    GoogleFit.getDailyStepCountSamples({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    })
+      .then(async (res) => {
+        if (res[1] && res[1].steps[0] && res[1].steps[0].value) {
+          // Vérifier l'existence de res[1], res[1].steps[0] et res[1].steps[0].value
+          setSteps(res[1].steps[0].value);
+        }
+      })
+  };
+
+  // Fonction pour recuperer les calories brûlées quotidiennes
+  const getCalorieData = async () => {
+    // Autoriser l'accès à Google Fit
+    await GoogleFit.authorize(options);
+
+    // Définir les dates de début et de fin
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // Récupérer les données des 7 derniers jours
+    const endDate = new Date();
+
+    // Récupérer les données de calories brûlées quotidiennes
+    GoogleFit.getDailyCalorieSamples({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    })
+      .then(async (res) => {
+        setCalories(res[0].calorie);
+      })
+  };
+
+ 
+
+
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getStepCountData();
+      getCalorieData();
+
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   //Modal Handler
   const [modalVisible, setModalVisible] = useState(false);
   const [newBoxValue, setNewBoxValue] = useState("");
+  const [article, setArticle] = useState({ title: 'Article Title', content: 'Article Content', authors: 'Article Authors', publicationDate: 'Article Publication Date', picture: 'Article Picture' });
+  const [articleModalVisible, setArticleModalVisible] = useState(false);
   const handleManualData = () => { //C'est un exemple
     if (selectedBox.title === 'Rythme Cardiaque') {
       setHeartRate(newBoxValue); // Mettre à jour le rythme cardiaque
@@ -25,26 +121,41 @@ const HomeScreen = (props) => {
     setSelectedBox({ ...selectedBox, number: newBoxValue });
     setLastUpdated(new Date().toLocaleString());
   };
+  const handleSubscriptionModal = () => {
+    setSubscriptionModalVisible(true);
+  };
+  const handleArticleModal = (articleTitle, articleContent, articleAuthors, articlePublicationDate, articlePicture) => {
+    setArticle({ title: articleTitle, content: articleContent, authors: articleAuthors, publicationDate: articlePublicationDate, picture: articlePicture });
+    setArticleModalVisible(true);
+  };
+
 
   //Box Handler
   const [selectedBox, setSelectedBox] = useState(null);
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
+  const handleBoxPress = (boxData) => {
+    setSelectedBox(boxData);
+    setModalVisible(true);
+  };
 
+  //SignOut Handler with App.js props
+  const handleSignOut = () => {
+    signOut();
+  };
 
 
 
   //UserData from App.js (props)
   const [firstName, setFirstName] = React.useState(props.userInfo.user.givenName);
+  const [lastName, setLastName] = React.useState(props.userInfo.user.familyName);
+  const [userEmail, setUserEmail] = React.useState(props.userInfo.user.email);
   const [userPicture, setUserPicture] = React.useState(props.userInfo.user.photo);
   //AccessoryData
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); // Formattez la date en français
 
-  //signOut de App.js
   const signOut = props.signOut;
 
-  //refreshData() de App.js
-  const refreshData = props.refreshData;
 
 
   return (
@@ -58,12 +169,14 @@ const HomeScreen = (props) => {
             <Text style={styles.title}>Hello {firstName} !</Text>
             <Text style={styles.subtitle}>{formattedDate}</Text>
           </View>
-          <TouchableOpacity style={styles.profil} onPress={() => navigation.navigate('Profile')}>
+          <TouchableOpacity onPress={() => setOpen(!open)} style={styles.profil}>
             <Image source={{ uri: userPicture }} style={styles.notification} />
           </TouchableOpacity>
-        </View>
-      </View>
 
+        </View>
+
+
+      </View>
       {/** Body */}
       <ScrollView style={styles.scrollView}>
 
@@ -125,13 +238,13 @@ const HomeScreen = (props) => {
               </TouchableOpacity>
             </View>
             <Text style={styles.modalText3}>🎉</Text>
-            <Text style={styles.modalText1}>TA MONTRE EST PRÊTE ! Notre liste VIP t'attends 😎
+            <Text style={styles.modalText1}>Ta montre est prête ! Notre liste VIP t'attends 😎
             </Text>
 
             <Text style={styles.modalText2}>Souscrivez des maintenant pour recevoir votre montre dans les meilleurs délais.</Text>
             <TextInput
               style={styles.inputemail}
-              placeholder="Entrez votre email"
+              placeholder="Votre numéro de téléphone"
             // Ajoutez votre logique pour gérer la souscription ici
             />
             <TouchableOpacity style={styles.modalButton} onPress={() => setSubscriptionModalVisible(false)}>
@@ -145,24 +258,145 @@ const HomeScreen = (props) => {
         </Modal>
 
         {/**  Modal Articles */}
+        <Modal
+          isVisible={articleModalVisible}
+          onSwipeComplete={() => setArticleModalVisible(false)}
+          swipeDirection="down"
+          style={styles.modal}
+        >
+          <ScrollView style={styles.modalScrollable}>
+            <View style={{ borderTopRightRadius: 20, borderTopLeftRadius: 20, overflow: 'hidden', marginBottom: 20, width: '100%' }}>
+
+            </View>
+            <View style={styles.rowArticle}>
+              <Text style={styles.modalText4}>{article.title}</Text>
+
+            </View>
+            <View style={styles.columnArticle}>
+              <Text style={styles.modalText5}>Auteurs : {article.authors}</Text>
+              <Text style={styles.modalText5}>Publication : {article.publicationDate}</Text>
+            </View>
+            <View style={styles.rowArticle}>
+
+              <Text style={styles.modalText2}>{article.content}</Text>
+            </View>
+
+
+          </ScrollView>
+
+        </Modal>
+
+        {/**  Modal Profil */}
+        <Modal
+          isVisible={open}
+          onSwipeComplete={() => setOpen(false)}
+          swipeDirection="down"
+          style={styles.modalProfile}
+        >
+          <View style={styles.modalViewProfil}>
+            <View style={styles.rowprofilLogo}>
+              <Image source={require('../assets/logo.png')} style={styles.logo} />
+            </View>
+
+            <View style={styles.column}>
+              <View style={styles.rowprofil}>
+                <View style={styles.rowprofilPicture}>
+                  <Image source={{ uri: userPicture }} style={styles.notification} />
+                </View>
+                <View style={styles.rowprofilText}>
+                  <Text style={styles.modalText7}>{firstName} {lastName}</Text>
+                  <Text style={styles.modalText7}>{userEmail}</Text>
+                </View>
+              </View>
+
+              <View style={styles.column}>
+                <TouchableOpacity onPress={()=>signOut} style={styles.profilButton}>
+                  <Text >Déconnexion</Text>
+                </TouchableOpacity>
+
+              </View>
+            </View>
+
+
+
+          </View>
+
+        </Modal>
 
 
         {/** Constantes */}
         <View style={styles.Constantes}>
-          <Notification title={'Penser à activer les notifications'} content={'Permettez nous de vous rappeler de prendre vos médicaments ou de faire votre séance de sport à temps. C’est pour votre bien ! '} color={'#008FAA'} icon={"information-circle-sharp"} />
+
+          <Notification title={'Version Bêta'} content={'Vous utiliser la version bêta de LifeS. Next realese 13/06/23 😎 '} color={'#999999'} icon={"information-circle-sharp"} />
+          <View style={{ height: 10 }} />
           <HeaderSection title={'Aujourd\'hui'} haveicon='true' />
 
           <View style={styles.boxContainer}>
-            <Box/>
+            <Box
+              color={'orange'}
+              icon={'walk'}
+              measure={'Pas'}
+              title={'Marche'}
+              number={steps} // Utilisez l'état heartRate pour afficher la valeur
+            />
+
+            <Box
+              color={'#0D991B'}
+              icon={'barbell'}
+              measure={'KG'}
+              title={'Poids'}
+              number={0} // Utilisez l'état heartRate pour afficher la valeur
+            />
+
+            <Box
+              color={'red'}
+              icon={'flame'}
+              measure={'KCal'}
+              title={'Calories brûlées'}
+              number={calories} // Utilisez l'état heartRate pour afficher la valeur
+            />
+
+            <TouchableOpacity onPress={handleSubscriptionModal} style={styles.action}>
+              <Text style={styles.actionText1}>Afficher toutes les constantes</Text>
+              <Icon name="chevron-forward-outline" size={30} color="black" />
+            </TouchableOpacity>
           </View>
 
         </View>
 
+        {/** Point Clé */}
+        <View style={styles.pointCle}>
+          <HeaderSection title={'Points clés'} haveicon='false' onpress={() => navigation.navigate('Constantes')} icon={'refresh'} />
+
+          <View style={styles.boxContainerPc}>
+            <BigBox icon={'water'} title={'Eau'} percentage={40} colorIcon={"#75E4F9"} measure={'Verre'} />
+            <BigBox icon={'bed'} title={'sommeil'} percentage={70} colorIcon={"orange"} measure={'Heures'} />
+            <BigBox icon={'bicycle-outline'} title={'Sport'} percentage={0} colorIcon={"green"} measure={'Minutes'} />
+            <BigBox icon={'medical'} title={'Medocs'} percentage={70} colorIcon={"pink"} measure={'prise VO'} disabled={true} onBoxPress={handleSubscriptionModal} />
+
+          </View>
+        </View>
+
+        {/** Connect Watch */}
+        <View style={styles.watchContainer}>
+          <ImageBackground source={require('../assets/watch.png')} style={styles.watch} />
+          <TouchableOpacity onPress={handleSubscriptionModal} style={styles.actionMontre}>
+            <Text style={styles.actionText}>Jumeler ma montre</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/** Articles */}
+        <View style={styles.article}>
+          <HeaderSection title={'Articles'} haveicon='false' text={'Voir tout'} icon={'refresh'} />
+          <View style={styles.boxContainer}>
+            <ArticleBox image={require('../assets/article1.jpg')} title={'10 aliments pour contrôler son hypertension'} onBoxPress={() => handleArticleModal('10 aliments pour contrôler son hypertension', 'Contenu de l\'article ici', 'Kathryn E. Wellen, Gökhan S. Hotamisligil', '2015', '../assets/article1.jpg')} />
+            <ArticleBox image={require('../assets/article2.jpg')} title={'Le stress, un facteur favorisant le diabète.'} onBoxPress={() => handleArticleModal('Le stress, un facteur favorisant le diabète.', 'Au cours de la dernière décennie, une abondance de preuves a émergé démontrant un lien étroit entre le métabolisme et l\'immunité. Il est maintenant clair que l\'obésité est associée à un état d\'inflammation chronique de faible niveau. Dans cet article, nous discutons des fondements moléculaires et cellulaires de l\'inflammation induite par l\'obésité et des voies de signalisation à l\'intersection du métabolisme et de l\'inflammation qui contribuent au diabète. Nous considérons également les mécanismes par lesquels la réponse inflammatoire peut être initiée et discutons des raisons de la réponse inflammatoire dans l\'obésité. Nous proposons à la réflexion quelques hypothèses concernant des questions importantes non résolues dans le domaine et suggérons un modèle pour l\'intégration des voies inflammatoires et métaboliques dans la maladie métabolique.', 'Kathryn E. Wellen, Gökhan S. Hotamisligil', '2015', '../assets/article2.jpg')} />
+
+          </View>
+        </View>
+
+
       </ScrollView>
-
-      {/** Deconnection */}
-
-      <Button title="Se déconnecter" onPress={() => signOut()} />
     </View>
   )
 }
@@ -170,6 +404,7 @@ const HomeScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -178,6 +413,22 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
 
+  modalProfile: {
+    
+    justifyContent: 'flex-end',
+    //Make it look like a card little
+  },
+
+
+  dropdownContainer: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+
+  article:
+    { width: '100%' },
   //Header
   headerContainer: {
     flex: 0.2,
@@ -187,11 +438,29 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
 
+  modalScrollable: {
+    margin: 0,
+    width: '100%',
+    paddingTop: '1%',
+    marginBottom: 20,
+    paddingBottom: 20,
+    backgroundColor: "#eeeeee",
+    borderRadius: 20,
+  },
+
+  imageModal: {
+    width: '100%',
+    height: 300,
+    resizeMode: "cover",
+    justifyContent: "center",
+    borderRadius: 20,
+  },
+
   header: {
     height: '100%',
 
     flexDirection: 'row',
-    paddingTop: 50,
+    paddingTop: '2%',
     marginBottom: 40,
     alignItems: 'center',
     justifyContent: 'center',
@@ -206,7 +475,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: 'black',
   },
   subtitle: {
@@ -224,13 +493,30 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
 
+  modalText4: {
+    fontSize: 35,
+    fontWeight: "900",
+    color: 'black',
+    marginBottom: 20,
+  },
+
+  modalText5: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: 'black',
+    //mettre en gras
+    marginBottom: 20,
+  },
+
+
   //Constantes
   scrollView: {
     flex: 1,
+
     width: '100%',
-    paddingHorizontal: 30,
-    paddingTop: 10,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: '1%',
+    marginBottom: 10,
   },
 
   boxContainer: {
@@ -245,6 +531,7 @@ const styles = StyleSheet.create({
 
   boxContainerPc: {
     flex: 1,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -257,7 +544,8 @@ const styles = StyleSheet.create({
   action: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#24252B',
+    borderWidth: 1,
+    borderColor: '#d7d7d7',
     justifyContent: 'center',
     paddingHorizontal: 18,
     marginVertical: 10,
@@ -270,18 +558,21 @@ const styles = StyleSheet.create({
   actionMontre: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#24252B',
-    opacity: 0.4,
+    backgroundColor: '#090909',
     justifyContent: 'center',
-    paddingHorizontal: 18,
-    marginVertical: 10,
-    paddingVertical: 19,
-    top: -15,
-    width: '100%',
+    paddingHorizontal: 9,
+    paddingVertical: 14,
+    width: '80%',
     borderRadius: 14
   },
 
   actionText: {
+    fontSize: 15,
+    color: 'white',
+    marginRight: 5,
+  },
+
+  actionText1: {
     fontSize: 15,
     color: 'black',
     marginRight: 5,
@@ -290,19 +581,15 @@ const styles = StyleSheet.create({
   // Watch
   watchContainer: {
     flex: 1,
-    width: 370,
-    height: 370,
-    backgroundColor: '#1B1B1B',
     borderRadius: 300,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 50,
-    marginTop: 50,
   },
 
   watch: {
-    width: 300,
-    height: 300,
+    width: '100%',
+    height: 400,
     //backgroundColor radial blue
     borderRadius: 300,
     alignItems: 'center',
@@ -317,13 +604,38 @@ const styles = StyleSheet.create({
 
   //Modal
   modalView: {
-    backgroundColor: "#3C3C43",
+    margin: 0,
+    backgroundColor: "#eeeeee",
     borderRadius: 20,
-    padding: 50,
+    paddingRight: 30,
+    paddingLeft: 30,
+    paddingTop: 20,
     flex: 1,
     width: '100%',
     top: '10%',
     height: '100%',
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+
+  modalViewProfil: {
+    margin: 0,
+    backgroundColor: "#f3f6f4",
+    borderRadius: 20,
+    paddingRight: 30,
+    paddingLeft: 30,
+    paddingTop: 20,
+    width: '100%',
+    height: '40%',
+    justifyContent: 'center',
+
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -341,16 +653,16 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 65,
     width: '100%',
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 
   modalText3: {
     marginBottom: 10,
     textAlign: "left",
     color: 'black',
-    fontSize: 100,
+    fontSize: 60,
     width: '100%',
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   modalText2: {
     marginBottom: 10,
@@ -362,11 +674,11 @@ const styles = StyleSheet.create({
   },
 
   modalText1: {
-    marginBottom: 20,
+    marginBottom: 5,
     color: 'black',
     textAlign: "left",
-    fontSize: 25,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: "bold",
   },
 
   modalText6: {
@@ -374,7 +686,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: 'black',
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 
   row: {
@@ -382,6 +694,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '80%',
+    marginBottom: 20,
+  },
+
+  rowArticle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 18,
+    marginBottom: 20,
+  },
+
+  columnArticle: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    width: '80%',
+    paddingHorizontal: 18,
     marginBottom: 20,
   },
 
@@ -408,7 +738,7 @@ const styles = StyleSheet.create({
 
 
   modalButton: {
-    backgroundColor: '#24252B',
+    backgroundColor: '#090909',
     borderRadius: 15,
     padding: 15,
     elevation: 2,
@@ -419,7 +749,7 @@ const styles = StyleSheet.create({
   },
 
   modalButtonText: {
-    color: 'black',
+    color: 'white',
     fontSize: 15,
   },
 
@@ -479,7 +809,7 @@ const styles = StyleSheet.create({
 
   modalSmallText: {
     color: 'black',
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 15,
     marginRight: 5,
   },
@@ -496,7 +826,7 @@ const styles = StyleSheet.create({
 
   inputemail: {
     borderRadius: 14,
-    backgroundColor: '#24252B',
+    backgroundColor: '#f3f6f4',
     padding: 20,
     marginTop: 20,
     marginBottom: 20,
@@ -508,8 +838,82 @@ const styles = StyleSheet.create({
     color: 'black',
   },
 
+  rowprofil: {
+    flexDirection: 'row',
+    borderRadius: 14,
+    backgroundColor: '#cfe2f3',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 18,
+    marginBottom: 20,
+  },
 
+  rowprofilPicture: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '10%',
+    paddingHorizontal: 18,
+    marginBottom: 20,
+    marginTop: 20,
+  },
 
+  rowprofilText: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 18,
+    marginBottom: 20,
+    marginTop: 20,
+  },
+
+  column:{
+    flexDirection: 'column',
+  },
+
+  modalText7 : {
+    marginLeft: '30%',
+    color: 'black',
+    fontSize: 15,
+    width: '100%',
+  },
+
+  modalText6: {
+    textAlign: "center",
+    color: 'black',
+    fontSize: 30,
+    fontWeight: "bold",
+    width: '100%',
+  },
+
+  profilButton: {
+    borderRadius: 15,
+    padding: 15,
+    
+    borderWidth: 1,
+    borderColor: '#d7d7d7',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+
+  logo : {
+    width: 70,
+    height: 70,
+    borderColor: '#f3f6f4',
+  },
+
+  rowprofilLogo : {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 18,
+    marginBottom: 20,
+  }
 
 
 });
