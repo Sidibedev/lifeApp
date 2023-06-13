@@ -38,21 +38,21 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
     },
 
     row2: {
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
     },
 
     row3: {
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
 
         marginBottom: 15,
     },

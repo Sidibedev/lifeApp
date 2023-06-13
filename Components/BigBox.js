@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
         alignItems: 'center',
     },
 

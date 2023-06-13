@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
         alignItems: 'center',
     },
 
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 25,
         marginLeft: 30,
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
         alignItems: "flex-end",
     },
 
