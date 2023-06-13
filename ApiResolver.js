@@ -2,10 +2,11 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import GoogleFit, {Scopes} from 'react-native-google-fit';
+import GoogleFit, { Scopes } from 'react-native-google-fit';
 
 
 export default function App() {
+  const [authorized, setAuthorized] = useState(false);
   var [dailySteps, setdailySteps] = useState(0);
   var [heartRate, setHeartRate] = useState(0);
   var [calories, setCalories] = useState(0);
@@ -14,7 +15,7 @@ export default function App() {
   var [weight, setWeight] = useState(0);
   var [bloodPressure, setBloodPressure] = useState({});
   var [loading, setLoading] = useState(true);
-  
+
 
   useEffect(() => {
     // Configure Google Sign-In
@@ -24,48 +25,52 @@ export default function App() {
     });
   }, []);
 
-// Configure Google Fit
-const options = {
-  scopes: [
-    Scopes.FITNESS_ACTIVITY_READ,
-    Scopes.FITNESS_ACTIVITY_WRITE,
-    Scopes.FITNESS_BODY_READ,
-    Scopes.FITNESS_BODY_WRITE,
-    Scopes.FITNESS_BLOOD_PRESSURE_READ,
-    Scopes.FITNESS_BLOOD_PRESSURE_WRITE,
-    Scopes.FITNESS_BLOOD_GLUCOSE_READ,
-    Scopes.FITNESS_BLOOD_GLUCOSE_WRITE,
-    Scopes.FITNESS_NUTRITION_WRITE,
-    Scopes.FITNESS_SLEEP_READ,
-  ],
-};
+  // Configure Google Fit
+  const options = {
+    scopes: [
+      Scopes.FITNESS_ACTIVITY_READ,
+      Scopes.FITNESS_ACTIVITY_WRITE,
+      Scopes.FITNESS_BODY_READ,
+      Scopes.FITNESS_BODY_WRITE,
+      Scopes.FITNESS_BLOOD_PRESSURE_READ,
+      Scopes.FITNESS_BLOOD_PRESSURE_WRITE,
+      Scopes.FITNESS_BLOOD_GLUCOSE_READ,
+      Scopes.FITNESS_BLOOD_GLUCOSE_WRITE,
+      Scopes.FITNESS_NUTRITION_WRITE,
+      Scopes.FITNESS_SLEEP_READ,
+    ],
+  };
 
 
-// Check if the user is already authorized
-GoogleFit.checkIsAuthorized()
-.then((authorized) => {
-  if (authorized) {
-    console.log('AUTH_SUCCESS');
-  } else {
-    // Authorize the user if not already authorized
-    GoogleFit.authorize(options)
-      .then((authResult) => {
-        if (authResult.success) {
-          console.log('AUTH_SUCCESS');
-        } else {
-          console.log('AUTH_DENIED ' + authResult.message);
-          
-        }
-      })
-      .catch((error) => {
-        console.log('AUTH_ERROR', error);
-      });
-  }
-})
-.catch((error) => {
-  console.log('AUTH_ERROR', error);
-  setLoading(false);
-});
+  // Check if the user is already authorized
+  GoogleFit.checkIsAuthorized()
+    .then((authorized) => {
+      if (authorized) {
+        console.log('AUTH_SUCCESS');
+        fetchDailySteps();
+        setAuthorized(true);
+      } else {
+        // Authorize the user if not already authorized
+        GoogleFit.authorize(options)
+          .then((authResult) => {
+            if (authResult.success) {
+              setAuthorized(true);
+              console.log('AUTH_SUCCESS');
+              fetchDailySteps();
+            } else {
+              console.log('AUTH_DENIED ' + authResult.message);
+
+            }
+          })
+          .catch((error) => {
+            console.log('AUTH_ERROR', error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.log('AUTH_ERROR', error);
+      setLoading(false);
+    });
 
 
   const signInWithGoogle = async () => {
@@ -88,41 +93,49 @@ GoogleFit.checkIsAuthorized()
       startDate: "2021-01-01T00:00:17.971Z", // required ISO8601Timestamp
       endDate: new Date().toISOString() // required ISO8601Timestamp
     };
-    const res = await GoogleFit.getDailyStepCountSamples(options);
-    const data = res.reverse();
-    if (res.length === 0) {
-      console.log("No steps found for this period");
-    } else {
-      data.forEach((item) => {
-        console.log("Données de pas :", item.steps);
-      });
-    }
-      
 
+    //Verifier si l'utilisateur est autorisé
+    if (authorized === false) {
+      console.log("Not authorized");
+
+      return;
+    }
+    else {
+      const res = await GoogleFit.getDailyStepCountSamples(options);
+      const data = res.reverse();
+      if (res.length === 0) {
+        console.log("No steps found for this period");
+      } else {
+        data.forEach((item) => {
+          console.log("DONNE DES PAS :", item.steps);
+        });
+      }
+
+    };
   };
 
 
 
 
-  useEffect(() => {
-    fetchDailySteps();
+    useEffect(() => {
+      fetchDailySteps();
     }, []);
 
 
-  return (
-    <View style={styles.container}>
-      <Text>Ouvrez App.js pour commencer à travailler sur votre application !</Text>
-      <Button title="Se connecter avec Google" onPress={signInWithGoogle} />
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    return (
+      <View style={styles.container}>
+        <Text>Ouvrez App.js pour commencer à travailler sur votre application !</Text>
+        <Button title="Se connecter avec Google" onPress={signInWithGoogle} />
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
