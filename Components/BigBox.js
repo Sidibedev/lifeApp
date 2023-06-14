@@ -2,35 +2,85 @@ import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
     const [percentage, setPercentage] = useState(0);
 
-    const increasePercentage = () => {
-        if (title === 'Eau' && percentage < 100) {
-            setPercentage(Math.floor(percentage + 10));
-        } else if (title === 'sommeil' && percentage < 100) {
-            setPercentage(Math.floor(percentage + 100 / 8));
-        } else if (title === 'Sport' && percentage < 100) {
-            setPercentage(percentage + 30);
-        }
-    };
-
-    const decreasePercentage = () => {
-        if (title === 'Eau' && percentage < 100 && percentage > 0) {
-            setPercentage(Math.floor(percentage - 10));
-        } else if (title === 'sommeil' && percentage < 100 & percentage > 8) {
-            if (percentage - 100 / 8 < 0) {
+    //enregistrement des données dans le local storage meme en fermant l'application 
+   
+    //Chaque jour à 00h on remet les compteurs à 0
+    const resetPercentage = async () => {
+        const today = new Date();
+        const lastReset = await AsyncStorage.getItem('lastReset');
+        if (lastReset) {
+            const lastResetDate = new Date(lastReset);
+            if (today.getDate() !== lastResetDate.getDate()) {
                 setPercentage(0);
-            } else
-                setPercentage(Math.floor(percentage - 100 / 8));
-        } else if (title === 'Sport' && percentage < 100 && percentage > 0) {
-            setPercentage(percentage - 30);
+                await AsyncStorage.setItem('lastReset', today.toString());
+            }
+        } else {
+            setPercentage(0);
+            await AsyncStorage.setItem('lastReset', today.toString());
         }
-    };
+    }
 
+
+
+    const increasePercentage = async () => {
+        let updatedPercentage;
+      
+        if (title === 'Eau' && percentage < 100) {
+          updatedPercentage = Math.floor(percentage + 10);
+        } else if (title === 'sommeil' && percentage < 100) {
+          updatedPercentage = Math.floor(percentage + 100 / 8);
+        } else if (title === 'Sport' && percentage < 100) {
+          updatedPercentage = percentage + 30;
+        }
+      
+        if (updatedPercentage !== undefined) {
+          setPercentage(updatedPercentage);
+          await AsyncStorage.setItem(`${title}_percentage`, String(updatedPercentage));
+        }
+      };
+      
+      const decreasePercentage = async () => {
+        let updatedPercentage;
+      
+        if (title === 'Eau' && percentage < 100 && percentage > 0) {
+          updatedPercentage = Math.floor(percentage - 10);
+        } else if (title === 'sommeil' && percentage < 100 && percentage > 8) {
+          if (percentage - 100 / 8 < 0) {
+            updatedPercentage = 0;
+          } else {
+            updatedPercentage = Math.floor(percentage - 100 / 8);
+          }
+        } else if (title === 'Sport' && percentage < 100 && percentage > 0) {
+          updatedPercentage = percentage - 30;
+        }
+      
+        if (updatedPercentage !== undefined) {
+          setPercentage(updatedPercentage);
+          await AsyncStorage.setItem(`${title}_percentage`, String(updatedPercentage));
+        }
+      };
+      
+      
+      React.useEffect(() => {
+        resetPercentage();
+        const fetchPercentage = async () => {
+          const storedPercentage = await AsyncStorage.getItem(`${title}_percentage`);
+          if (storedPercentage) {
+            setPercentage(Number(storedPercentage));
+          }
+          console.log(storedPercentage)
+        };
+      
+        fetchPercentage();
+      }, []);
+      
 
     if (disabled) {
         return (
@@ -202,7 +252,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 15,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         color: '#060606',
     },
 
@@ -219,7 +269,7 @@ const styles = StyleSheet.create({
     percentageTitle: {
         fontSize: 20,
         textAlign: 'center',
-        fontWeight: 'bold',
+        fontWeight: "bold",
         color: '#060606',
     },
     percentageSubtitle: {

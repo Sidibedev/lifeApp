@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import GoogleFit, { Scopes } from 'react-native-google-fit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { UserProvider } from './Context/UserContext'; // Importez UserProvider
 import HomeScreen from './Screens/HomeScreen';
@@ -82,11 +83,22 @@ const App = () => {
   };
 
 
-  //Afficher le SplashScreen pendant 10 secondes
+
   useEffect(() => {
-    setTimeout(() => {
+    const checkUser = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        console.log('User LOG >>>', user !== null ? 'connected' : 'not connected');
+        console.log('User LOG >>>', storedUser ) ;
+      }
+      else {
+        console.log('User LOG >>>', user !== null ? 'connected' : 'not connected');
+      }
       setInitializing(false);
-    }, 10000);
+    };
+
+    checkUser();
   }, []);
 
 

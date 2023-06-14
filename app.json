@@ -1,10 +1,22 @@
 {
   "expo": {
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "icon": "./assets/icon.png",
     "name": "lifeApp",
     "slug": "lifeApp",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a567befe-0bfe-487c-b1aa-5f0e0fe82347"
+      }
+    },
+    "owner": "jusoleil"
   }
 }
