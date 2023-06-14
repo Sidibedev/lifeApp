@@ -11,6 +11,23 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
 
     //enregistrement des données dans le local storage meme en fermant l'application 
    
+    //Chaque jour à 00h on remet les compteurs à 0
+    const resetPercentage = async () => {
+        const today = new Date();
+        const lastReset = await AsyncStorage.getItem('lastReset');
+        if (lastReset) {
+            const lastResetDate = new Date(lastReset);
+            if (today.getDate() !== lastResetDate.getDate()) {
+                setPercentage(0);
+                await AsyncStorage.setItem('lastReset', today.toString());
+            }
+        } else {
+            setPercentage(0);
+            await AsyncStorage.setItem('lastReset', today.toString());
+        }
+    }
+
+
 
     const increasePercentage = async () => {
         let updatedPercentage;
@@ -52,6 +69,7 @@ const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
       
       
       React.useEffect(() => {
+        resetPercentage();
         const fetchPercentage = async () => {
           const storedPercentage = await AsyncStorage.getItem(`${title}_percentage`);
           if (storedPercentage) {
