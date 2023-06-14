@@ -262,7 +262,11 @@ const HomeScreen = (props) => {
             <Text style={styles.subtitle}>{formattedDate}</Text>
           </View>
           <TouchableOpacity onPress={() => setOpen(!open)} style={styles.profil}>
-            <Image source={{ uri: userPicture }} style={styles.notification} />
+            {userPicture !== null
+              ?<Image source={{ uri: userPicture }} style={styles.notification} />
+              : <Image source={require('../assets/logo.png')} style={styles.notification} />
+
+            }
           </TouchableOpacity>
 
         </View>
@@ -396,7 +400,11 @@ const HomeScreen = (props) => {
             <View style={styles.column}>
               <View style={styles.rowprofil}>
                 <View style={styles.rowprofilPicture}>
-                  <Image source={{ uri: userPicture }} style={styles.notification} />
+                {userPicture !== null
+                  ?<Image source={{ uri: userPicture }} style={styles.notification} />
+                  : <Image source={require('../assets/logo.png')} style={styles.notification} />
+    
+                }
                 </View>
                 <View style={styles.rowprofilText}>
                   <Text style={styles.modalText7}>{firstName} {lastName}</Text>
@@ -607,7 +615,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: 'black',
   },
   subtitle: {
@@ -627,14 +635,14 @@ const styles = StyleSheet.create({
 
   modalText4: {
     fontSize: 35,
-    fontWeight: "900",
+    fontWeight: 900,
     color: 'black',
     marginBottom: 20,
   },
 
   modalText5: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: 600,
     color: 'black',
     //mettre en gras
     marginBottom: 20,
@@ -785,7 +793,7 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 65,
     width: '100%',
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 
   modalText3: {
@@ -794,7 +802,7 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 60,
     width: '100%',
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   modalText2: {
     marginBottom: 10,
@@ -810,7 +818,7 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: "left",
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 
 
@@ -928,7 +936,7 @@ const styles = StyleSheet.create({
 
   modalSmallText: {
     color: 'black',
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 15,
     marginRight: 5,
   },
@@ -1003,7 +1011,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: 'black',
     fontSize: 30,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     width: '100%',
   },
 

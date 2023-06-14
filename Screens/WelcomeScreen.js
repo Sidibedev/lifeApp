@@ -18,11 +18,21 @@ const WelcomeScreen = (props) => {
   //On utilise les props signIn et connectToGoogleFit de App.js
   const handleSignIn = async () => {
     setIsLoading(true);
-    await props.signIn();
-    await props.connectToGoogleFit();
-    setIsLoading(false);
-    await props.storeData();
+    try {
+      if (props.signIn && typeof props.signIn === 'function') {
+        await props.signIn();
+      } else {
+        console.error('props.signIn is not a function');
+      }
+      
+      setIsLoading(false);
+  
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+    }
   };
+  
 
   const renderLoadingScreen = () => {
     if (isLoading) {

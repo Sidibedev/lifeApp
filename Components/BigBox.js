@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 15,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         color: '#060606',
     },
 
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     percentageTitle: {
         fontSize: 20,
         textAlign: 'center',
-        fontWeight: "bold",
+        fontWeight: 'bold',
         color: '#060606',
     },
     percentageSubtitle: {
