@@ -5,7 +5,10 @@ import Modal from "react-native-modal";
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Toast from 'react-native-toast-message';
 
+import { db } from '../FirebaseConfig';
+import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 //Import Components
 import BigBox from '../Components/BigBox';
@@ -28,6 +31,8 @@ const HomeScreen = (props) => {
     { label: 'Java', value: 'java' },
     { label: 'JavaScript', value: 'js' }
   ]);
+
+  const [number, setNumber] = useState('')
 
   const options = {
     scopes: [
@@ -93,12 +98,69 @@ const HomeScreen = (props) => {
       })
   };
 
- 
+  const modifyNumber = async (number) => {
+    if (number != undefined && number != null && number != "") {
+      try {
+        const userRef = doc(db, 'users', props.userInfo.user.email);
+        await updateDoc(userRef, {
+          phoneNumber: number
+        });
+
+        console.log(`Le numéro de téléphone de l'utilisateur '${props.userInfo.user.email}' a été mis à jour dans Firestore.`);
+        Toast.show({
+          type: 'success',
+          text1: 'Numéro de téléphone a été enregistré avec succès.',
+        });
+        setNumber("");
+      } catch (error) {
+        console.error("Une erreur est survenue lors de la mise à jour du numéro de téléphone de l'utilisateur :", error);
+        Toast.show({
+          type: 'error',
+          text1: 'Erreur',
+          text2: 'Une erreur est survenue lors de l\'enregistrement de votre numéro de téléphone. Veuillez réessayer.'
+        });
+      }
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: 'Le numéro de téléphone ne peut pas être vide.',
+      });
+    }
+  };
+
 
 
 
 
   useEffect(() => {
+    const initializeCollection = async () => {
+      try {
+        const collectionName = 'users';
+        const userEmail = props.userInfo.user.email;
+        const collectionRef = collection(db, collectionName);
+        const docSnapshot = await getDoc(doc(collectionRef, userEmail));
+
+        if (docSnapshot.exists()) {
+          console.log(`L'utilisateur '${userEmail}' existe déjà dans la collection '${collectionName}'.`);
+        } else {
+          console.log(`L'utilisateur '${userEmail}' n'existe pas dans la collection '${collectionName}'. Il va être créé.`);
+
+          const user = {
+            ...props.userInfo,
+            phoneNumber: '' // Numéro de téléphone à vide pour l'instant
+          };
+
+          const userDocRef = doc(collectionRef, userEmail);
+          await setDoc(userDocRef, user); // utilise l'e-mail de l'utilisateur comme ID du document
+          console.log(`L'utilisateur '${userEmail}' a été ajouté à la collection '${collectionName}'.`);
+        }
+      } catch (error) {
+        console.error('Une erreur est survenue lors de l\'initialisation de la collection :', error);
+      }
+    }
+
+    initializeCollection();
+
     const interval = setInterval(() => {
       getStepCountData();
       getCalorieData();
@@ -245,14 +307,16 @@ const HomeScreen = (props) => {
             <TextInput
               style={styles.inputemail}
               placeholder="Votre numéro de téléphone"
+              onChangeText={(text) => setNumber(text)}
+              value={number}
             // Ajoutez votre logique pour gérer la souscription ici
             />
-            <TouchableOpacity style={styles.modalButton} onPress={() => setSubscriptionModalVisible(false)}>
+            <TouchableOpacity style={styles.modalButton} onPress={() => modifyNumber(number)}>
               <Text style={styles.modalButtonText}>Souscrire</Text>
             </TouchableOpacity>
 
             <Notification title={'Release'} content={'Nos prochaines releases vous réservent pleins de surprises🔥.'} color={'#9D9D9D'} icon={"aperture"} />
-
+            <Toast ref={(ref) => Toast.setRef(ref)} />
           </View>
 
         </Modal>
@@ -310,7 +374,7 @@ const HomeScreen = (props) => {
               </View>
 
               <View style={styles.column}>
-                <TouchableOpacity onPress={()=>signOut} style={styles.profilButton}>
+                <TouchableOpacity onPress={() => signOut} style={styles.profilButton}>
                   <Text >Déconnexion</Text>
                 </TouchableOpacity>
 
@@ -414,7 +478,7 @@ const styles = StyleSheet.create({
   },
 
   modalProfile: {
-    
+
     justifyContent: 'flex-end',
     //Make it look like a card little
   },
@@ -869,11 +933,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
-  column:{
+  column: {
     flexDirection: 'column',
   },
 
-  modalText7 : {
+  modalText7: {
     marginLeft: '30%',
     color: 'black',
     fontSize: 15,
@@ -891,7 +955,7 @@ const styles = StyleSheet.create({
   profilButton: {
     borderRadius: 15,
     padding: 15,
-    
+
     borderWidth: 1,
     borderColor: '#d7d7d7',
     width: '100%',
@@ -900,13 +964,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  logo : {
+  logo: {
     width: 70,
     height: 70,
     borderColor: '#f3f6f4',
   },
 
-  rowprofilLogo : {
+  rowprofilLogo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
