@@ -6110,6 +6110,11 @@ react-native-animatable@1.3.3:
   dependencies:
     prop-types "^15.7.2"
 
+react-native-ble-plx@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/react-native-ble-plx/-/react-native-ble-plx-2.0.3.tgz"
+  integrity sha512-62LRDBPf/03K7sge+qq2ZuF8PWCGB782G+SBrpgNm5fA5Hs3FCY1ExTJZ1G0tB5ZhBPYEXcKRxPLuFegcDFrqA==
+
 react-native-circular-progress@^1.3.8:
   version "1.3.8"
   resolved "https://registry.npmjs.org/react-native-circular-progress/-/react-native-circular-progress-1.3.8.tgz"

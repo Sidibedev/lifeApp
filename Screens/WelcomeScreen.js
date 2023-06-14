@@ -17,24 +17,12 @@ const WelcomeScreen = (props) => {
 
   //On utilise les props signIn et connectToGoogleFit de App.js
   const handleSignIn = async () => {
-   const user = await props.signIn();
-    if (user) { 
-      console.log(user);
-      const data = await props.connectToGoogleFit();
-      if (data) {
-        await AsyncStorage.setItem('data', JSON.stringify(data));
-        console.log(data);
-        setIsLoading(false); // Désactiver l'écran de chargement
-      // Enregistrer les données utilisateur dans AsyncStorage
-      await AsyncStorage.setItem('user', JSON.stringify(user));
-      console.log(user);
-
-        // redict to HomeScreen avec les données de l'utilisateur en props
-        navigation.navigate('Home');
-      }
-    }
-  }
-
+    setIsLoading(true);
+    await props.signIn();
+    await props.connectToGoogleFit();
+    setIsLoading(false);
+    await props.storeData();
+  };
 
   const renderLoadingScreen = () => {
     if (isLoading) {

@@ -23,6 +23,8 @@ const HomeScreen = (props) => {
   const [Weight, setWeight] = useState(0);
 
   const [open, setOpen] = useState(false);
+  const [isInitializing, setInitializing] = useState(true); // Nouveau état pour le suivi de l'initialisation
+
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     { label: 'Java', value: 'java' },
@@ -57,8 +59,9 @@ const HomeScreen = (props) => {
 
     // Définir les dates de début et de fin
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 7); // Récupérer les données des 7 derniers jours
-    const endDate = new Date();
+  startDate.setHours(0, 0, 0, 0); // Définir l'heure à minuit (début de la journée)
+  const endDate = new Date();
+  endDate.setHours(23, 59, 59, 999); // Définir l'heure à 23:59:59.999 (fin de la journée)
 
     // Récupérer les données de pas quotidiens
     GoogleFit.getDailyStepCountSamples({
@@ -94,9 +97,20 @@ const HomeScreen = (props) => {
   };
 
  
+  const renderLoadingScreen = () => {
+    if (isInitializing) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
+    }
+    return null;
+  };
 
 
 
+    
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -327,7 +341,7 @@ const HomeScreen = (props) => {
         {/** Constantes */}
         <View style={styles.Constantes}>
 
-          <Notification title={'Version Bêta'} content={'Vous utiliser la version bêta de LifeS. Next realese 13/06/23 😎 '} color={'#999999'} icon={"information-circle-sharp"} />
+          <Notification title={'Version Bêta'} content={'Vous utiliser la version bêta de LifeS. Next realese 13/06/23 😎 '} color={'#0a0a0a'} icon={"information-circle-sharp"} />
           <View style={{ height: 10 }} />
           <HeaderSection title={'Aujourd\'hui'} haveicon='true' />
 
@@ -352,7 +366,7 @@ const HomeScreen = (props) => {
               color={'red'}
               icon={'flame'}
               measure={'KCal'}
-              title={'Calories brûlées'}
+              title={'Calories brûlées /sem'}
               number={calories} // Utilisez l'état heartRate pour afficher la valeur
             />
 
