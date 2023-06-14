@@ -163,34 +163,6 @@ const HomeScreen = (props) => {
     
 
   useEffect(() => {
-    const initializeCollection = async () => {
-      try {
-        const collectionName = 'users';
-        const userEmail = props.userInfo.user.email;
-        const collectionRef = collection(db, collectionName);
-        const docSnapshot = await getDoc(doc(collectionRef, userEmail));
-
-        if (docSnapshot.exists()) {
-          console.log(`L'utilisateur '${userEmail}' existe déjà dans la collection '${collectionName}'.`);
-        } else {
-          console.log(`L'utilisateur '${userEmail}' n'existe pas dans la collection '${collectionName}'. Il va être créé.`);
-
-          const user = {
-            ...props.userInfo,
-            phoneNumber: '' // Numéro de téléphone à vide pour l'instant
-          };
-
-          const userDocRef = doc(collectionRef, userEmail);
-          await setDoc(userDocRef, user); // utilise l'e-mail de l'utilisateur comme ID du document
-          console.log(`L'utilisateur '${userEmail}' a été ajouté à la collection '${collectionName}'.`);
-        }
-      } catch (error) {
-        console.error('Une erreur est survenue lors de l\'initialisation de la collection :', error);
-      }
-    }
-
-    initializeCollection();
-
     const interval = setInterval(() => {
       getStepCountData();
       getCalorieData();
