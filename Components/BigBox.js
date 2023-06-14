@@ -8,24 +8,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BigBox = ({ icon, title, colorIcon, measure, disabled, onBoxPress }) => {
     const [percentage, setPercentage] = useState(0);
+    const isMountedRef = React.useRef(null);
 
-    //enregistrement des données dans le local storage meme en fermant l'application 
-   
-    //Chaque jour à 00h on remet les compteurs à 0
+    React.useEffect(() => {
+      isMountedRef.current = true;
+      return () => isMountedRef.current = false;
+    }, []);
+    
     const resetPercentage = async () => {
-        const today = new Date();
-        const lastReset = await AsyncStorage.getItem('lastReset');
-        if (lastReset) {
-            const lastResetDate = new Date(lastReset);
-            if (today.getDate() !== lastResetDate.getDate()) {
-                setPercentage(0);
-                await AsyncStorage.setItem('lastReset', today.toString());
-            }
-        } else {
+        const now = new Date();
+        const nextDay = new Date(now);
+        nextDay.setDate(now.getDate() + 1);
+        nextDay.setHours(0, 0, 0, 0);
+        const timeToNextDay = nextDay - now;
+        setTimeout(async () => {
+          // Réinitialisez le pourcentage ici
+          setPercentage(0);
+          await AsyncStorage.setItem(`${title}_percentage`, String(0));
+          // Ensuite, vérifiez chaque jour
+          setInterval(async () => {
+            // Réinitialisez le pourcentage ici
             setPercentage(0);
-            await AsyncStorage.setItem('lastReset', today.toString());
-        }
-    }
+            await AsyncStorage.setItem(`${title}_percentage`, String(0));
+          }, 24 * 60 * 60 * 1000); // Chaque 24 heures
+        }, timeToNextDay); // Temps jusqu'à minuit
+      };
+    
+    React.useEffect(() => {
+      resetPercentage();
+    })
+
+    
 
 
 

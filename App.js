@@ -18,6 +18,8 @@ import googleFit from 'react-native-google-fit';
 const Stack = createStackNavigator();
 
 const App = () => {
+
+  const [userFinded, setUserFinded] = useState(false);
   const [user, setUser] = useState(null);
   const [authorized, setAuthorized] = useState(false);
   const [isInitializing, setInitializing] = useState(true); // Nouveau état pour le suivi de l'initialisation
@@ -83,29 +85,52 @@ const App = () => {
   };
 
 
-
   useEffect(() => {
-    const checkUser = async () => {
-      const storedUser = await AsyncStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-        console.log('User LOG >>>', user !== null ? 'connected' : 'not connected');
-        console.log('User LOG >>>', storedUser ) ;
-      }
-      else {
-        console.log('User LOG >>>', user !== null ? 'connected' : 'not connected');
-      }
-      setInitializing(false);
-    };
-
-    checkUser();
+    getUser();
+    storeUser(user);
   }, []);
 
+  const getUser = async () => {
+    setInitializing(true);
+    try {
+      const value = await AsyncStorage.getItem('user');
+      if (value !== null) {
+        setUser(JSON.parse(value));
+
+        //timer avant de mettre à jour le state
+        setTimeout(() => {
+          console.log('User RETRIEVED >>>');
+
+          setInitializing(false);
+        }, 5000);
+        setUserFinded(true);
+      } else {
+        console.log('User NOT RETRIEVED YET >>>');
+      }
+    } catch (error) {
+      console.log('Erreur de récupération:', error);
+      setUserFinded(false);
+    }
+  };
+
+  const storeUser = async (user) => {
+    try {
+      if (user !== null) {
+        await AsyncStorage.setItem('user', JSON.stringify(user));
+
+        //Print what is stored
+        const value = await AsyncStorage.getItem('user');
+        setInitializing(false);
+      }
+      else {
+        console.log('User NOT STORED YET >>>');
+      }
+    } catch (error) {
+      console.log('Erreur de stockage:', error);
+    }
+  };
 
 
-
-  //Console.log pour vérifier si l'utilisateur est connecté ou non et affiche connected ou not connected
-  console.log('User >>>', user !== null ? 'connected' : 'not connected');
 
 
 
@@ -123,13 +148,14 @@ const App = () => {
               {(props) => <SplashScreen {...props} />}
             </Stack.Screen>
           ) : null}
+
           {user ? (
             <Stack.Screen name="Home">
               {(props) => <HomeScreen {...props} signOut={signOut} userInfo={user} />}
             </Stack.Screen>
           ) : (
             <Stack.Screen name="Welcome">
-              {(props) => <WelcomeScreen {...props} signIn={signIn} />}
+              {(props) => <WelcomeScreen {...props} signIn={signIn} storeUser={storeUser} />}
 
             </Stack.Screen>
           )}

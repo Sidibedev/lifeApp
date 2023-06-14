@@ -11,7 +11,8 @@ const Box = ({ icon, measure, number, title, color,onPress }) => {
     const [finalColor, setFinalColor] = useState(color)
 
     const handleColor = () => {
-        if (number === 0)
+        
+        if (number === 0 && color!=='orange')
             setFinalColor('lightgrey')
         else
             setFinalColor(color)
