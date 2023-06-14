@@ -105,6 +105,7 @@ const App = () => {
         }, 5000);
         setUserFinded(true);
       } else {
+        
         console.log('User NOT RETRIEVED YET >>>');
       }
     } catch (error) {
