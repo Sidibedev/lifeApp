@@ -5,7 +5,10 @@ import Modal from "react-native-modal";
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Toast from 'react-native-toast-message';
 
+import { db } from '../FirebaseConfig';
+import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 //Import Components
 import BigBox from '../Components/BigBox';
@@ -30,6 +33,8 @@ const HomeScreen = (props) => {
     { label: 'Java', value: 'java' },
     { label: 'JavaScript', value: 'js' }
   ]);
+
+  const [number, setNumber] = useState('')
 
   const options = {
     scopes: [
@@ -96,6 +101,51 @@ const HomeScreen = (props) => {
       })
   };
 
+  const [erreur, setErreur] = useState("");
+
+  const modifyNumber = async (number) => {
+    const numberRegex = /^\+?\d{9,}$/;
+
+    if (number !== undefined && number !== null && number !== "") {
+      if (number.match(numberRegex)) {
+        try {
+          const userRef = doc(db, 'users', props.userInfo.user.email);
+          await updateDoc(userRef, {
+            phoneNumber: number
+          });
+
+          console.log(`Le numéro de téléphone de l'utilisateur '${props.userInfo.user.email}' a été mis à jour dans Firestore.`);
+          Toast.show({
+            type: 'success',
+            text1: 'Numéro de téléphone a été enregistré avec succès.',
+          });
+          setNumber("");
+          setSubscriptionModalVisible(false);
+        } catch (error) {
+          setErreur("Une erreur est survenue lors de la mise à jour du numéro de téléphone de l'utilisateur :");
+          console.error("Une erreur est survenue lors de la mise à jour du numéro de téléphone de l'utilisateur :", error);
+          Toast.show({
+            type: 'error',
+            text1: 'Erreur',
+            text2: 'Une erreur est survenue lors de l\'enregistrement de votre numéro de téléphone. Veuillez réessayer.'
+          });
+        }
+      } else {
+        setErreur("Le numéro de téléphone doit contenir au moins 9 chiffres.");
+        Toast.show({
+          type: 'error',
+          text1: 'Le numéro de téléphone doit contenir au moins 9 chiffres.',
+        });
+      }
+    } else {
+      setErreur("Le numéro de téléphone ne peut pas être vide.")
+      Toast.show({
+        type: 'error',
+        text1: 'Le numéro de téléphone ne peut pas être vide.',
+      });
+    }
+  };
+
  
   const renderLoadingScreen = () => {
     if (isInitializing) {
@@ -113,6 +163,34 @@ const HomeScreen = (props) => {
     
 
   useEffect(() => {
+    const initializeCollection = async () => {
+      try {
+        const collectionName = 'users';
+        const userEmail = props.userInfo.user.email;
+        const collectionRef = collection(db, collectionName);
+        const docSnapshot = await getDoc(doc(collectionRef, userEmail));
+
+        if (docSnapshot.exists()) {
+          console.log(`L'utilisateur '${userEmail}' existe déjà dans la collection '${collectionName}'.`);
+        } else {
+          console.log(`L'utilisateur '${userEmail}' n'existe pas dans la collection '${collectionName}'. Il va être créé.`);
+
+          const user = {
+            ...props.userInfo,
+            phoneNumber: '' // Numéro de téléphone à vide pour l'instant
+          };
+
+          const userDocRef = doc(collectionRef, userEmail);
+          await setDoc(userDocRef, user); // utilise l'e-mail de l'utilisateur comme ID du document
+          console.log(`L'utilisateur '${userEmail}' a été ajouté à la collection '${collectionName}'.`);
+        }
+      } catch (error) {
+        console.error('Une erreur est survenue lors de l\'initialisation de la collection :', error);
+      }
+    }
+
+    initializeCollection();
+
     const interval = setInterval(() => {
       getStepCountData();
       getCalorieData();
@@ -256,17 +334,20 @@ const HomeScreen = (props) => {
             </Text>
 
             <Text style={styles.modalText2}>Souscrivez des maintenant pour recevoir votre montre dans les meilleurs délais.</Text>
+            <Text style={{ color: 'red', marginTop: 2,}}>{erreur}</Text>
             <TextInput
               style={styles.inputemail}
               placeholder="Votre numéro de téléphone"
+              onChangeText={(text) => setNumber(text)}
+              value={number}
             // Ajoutez votre logique pour gérer la souscription ici
             />
-            <TouchableOpacity style={styles.modalButton} onPress={() => setSubscriptionModalVisible(false)}>
+            <TouchableOpacity style={styles.modalButton} onPress={() => modifyNumber(number)}>
               <Text style={styles.modalButtonText}>Souscrire</Text>
             </TouchableOpacity>
 
             <Notification title={'Release'} content={'Nos prochaines releases vous réservent pleins de surprises🔥.'} color={'#9D9D9D'} icon={"aperture"} />
-
+            <Toast ref={(ref) => Toast.setRef(ref)} />
           </View>
 
         </Modal>
@@ -324,7 +405,7 @@ const HomeScreen = (props) => {
               </View>
 
               <View style={styles.column}>
-                <TouchableOpacity onPress={()=>handleSignOut()} style={styles.profilButton}>
+                <TouchableOpacity onPress={() => handleSignOut()} style={styles.profilButton}>
                   <Text >Déconnexion</Text>
                 </TouchableOpacity>
 
@@ -403,7 +484,43 @@ const HomeScreen = (props) => {
         <View style={styles.article}>
           <HeaderSection title={'Articles'} haveicon='false' text={'Voir tout'} icon={'refresh'} />
           <View style={styles.boxContainer}>
-            <ArticleBox image={require('../assets/article1.jpg')} title={'10 aliments pour contrôler son hypertension'} onBoxPress={() => handleArticleModal('10 aliments pour contrôler son hypertension', 'Contenu de l\'article ici', 'Kathryn E. Wellen, Gökhan S. Hotamisligil', '2015', '../assets/article1.jpg')} />
+            <ArticleBox image={require('../assets/article1.jpg')} title={'10 aliments pour contrôler son hypertension'} onBoxPress={() => handleArticleModal('10 aliments pour contrôler son hypertension',
+              `Introduction:
+L'hypertension artérielle est un problème de santé courant qui peut augmenter le risque de maladies cardiaques et d'accidents vasculaires cérébraux. Heureusement, certaines habitudes alimentaires peuvent aider à maintenir une tension artérielle saine. Cet article présente 10 aliments recommandés pour contrôler l'hypertension.
+L'ail:
+              L'ail est connu pour ses propriétés bénéfiques pour la santé cardiovasculaire. Il contient des composés actifs qui favorisent la dilatation des vaisseaux sanguins, réduisant ainsi la pression artérielle.
+
+Les légumes-feuilles verts:
+              Les épinards, le chou frisé, la laitue et autres légumes-feuilles verts sont riches en nitrates, qui aident à abaisser la pression artérielle en favorisant la relaxation des vaisseaux sanguins.
+
+Les baies:
+              Les baies, comme les myrtilles et les fraises, sont riches en antioxydants et en flavonoïdes. Ces composés contribuent à réduire l'inflammation et à protéger les vaisseaux sanguins, aidant ainsi à maintenir une pression artérielle saine.
+
+Les graines de lin:
+              Les graines de lin sont riches en acides gras oméga-3 et en fibres solubles. Ces nutriments peuvent aider à réduire la pression artérielle en améliorant la fonction vasculaire et en réduisant l'inflammation.
+
+Les légumineuses:
+              Les lentilles, les pois chiches et les haricots sont des sources de protéines végétales riches en fibres et en minéraux tels que le potassium et le magnésium. Ces nutriments favorisent une pression artérielle équilibrée.
+
+Les produits laitiers faibles en matières grasses:
+              Les produits laitiers faibles en matières grasses, tels que le lait écrémé et le yaourt grec, sont riches en calcium et en potassium, qui jouent un rôle clé dans la régulation de la pression artérielle.
+
+Les avocats:
+              Les avocats sont riches en graisses saines, en fibres et en potassium. Ils aident à maintenir une tension artérielle normale en réduisant les niveaux de cholestérol et en contrôlant l'inflammation.
+
+Les noix:
+              Les noix, comme les amandes et les noix de cajou, sont riches en acides gras oméga-3, en fibres et en minéraux tels que le potassium et le magnésium. Elles sont bénéfiques pour la santé cardiaque et peuvent aider à maintenir une pression artérielle saine.
+
+Les tomates:
+              Les tomates sont riches en lycopène, un antioxydant puissant. Le lycopène contribue à la relaxation des vaisseaux sanguins, ce qui peut aider à maintenir une tension artérielle normale.
+
+Le chocolat noir:
+              Le chocolat noir contient des flavonoïdes qui favorisent la santé cardiovasculaire en améliorant la fonction vasculaire et en réduisant la pression artérielle.
+
+Conclusion:
+              L'adoption d'une alimentation équilibrée comprenant ces 10 aliments peut contribuer à la prévention et au contrôle de l'hypertension artérielle. Cependant, il est important de consulter un professionnel de la santé avant d'apporter des changements significatifs à votre régime alimentaire pour prendre en compte vos besoins individuels.`,
+              'Dr. Marie Dubois',
+              '2022', '../assets/article1.jpg')} />
             <ArticleBox image={require('../assets/article2.jpg')} title={'Le stress, un facteur favorisant le diabète.'} onBoxPress={() => handleArticleModal('Le stress, un facteur favorisant le diabète.', 'Au cours de la dernière décennie, une abondance de preuves a émergé démontrant un lien étroit entre le métabolisme et l\'immunité. Il est maintenant clair que l\'obésité est associée à un état d\'inflammation chronique de faible niveau. Dans cet article, nous discutons des fondements moléculaires et cellulaires de l\'inflammation induite par l\'obésité et des voies de signalisation à l\'intersection du métabolisme et de l\'inflammation qui contribuent au diabète. Nous considérons également les mécanismes par lesquels la réponse inflammatoire peut être initiée et discutons des raisons de la réponse inflammatoire dans l\'obésité. Nous proposons à la réflexion quelques hypothèses concernant des questions importantes non résolues dans le domaine et suggérons un modèle pour l\'intégration des voies inflammatoires et métaboliques dans la maladie métabolique.', 'Kathryn E. Wellen, Gökhan S. Hotamisligil', '2015', '../assets/article2.jpg')} />
 
           </View>
@@ -411,6 +528,7 @@ const HomeScreen = (props) => {
 
 
       </ScrollView>
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </View>
   )
 }
@@ -428,7 +546,7 @@ const styles = StyleSheet.create({
   },
 
   modalProfile: {
-    
+
     justifyContent: 'flex-end',
     //Make it look like a card little
   },
@@ -883,11 +1001,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
-  column:{
+  column: {
     flexDirection: 'column',
   },
 
-  modalText7 : {
+  modalText7: {
     marginLeft: '30%',
     color: 'black',
     fontSize: 15,
@@ -905,7 +1023,7 @@ const styles = StyleSheet.create({
   profilButton: {
     borderRadius: 15,
     padding: 15,
-    
+
     borderWidth: 1,
     borderColor: '#d7d7d7',
     width: '100%',
@@ -914,13 +1032,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  logo : {
+  logo: {
     width: 70,
     height: 70,
     borderColor: '#f3f6f4',
   },
 
-  rowprofilLogo : {
+  rowprofilLogo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

@@ -105,10 +105,10 @@ const App = () => {
         }, 5000);
         setUserFinded(true);
       } else {
-        
         console.log('User NOT RETRIEVED YET >>>');
       }
     } catch (error) {
+      setInitializing(false);
       console.log('Erreur de récupération:', error);
       setUserFinded(false);
     }
