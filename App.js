@@ -106,6 +106,7 @@ const App = () => {
         setUserFinded(true);
       } else {
         console.log('User NOT RETRIEVED YET >>>');
+        setUserFinded(false);
       }
     } catch (error) {
       setInitializing(false);
@@ -125,13 +126,14 @@ const App = () => {
       }
       else {
         console.log('User NOT STORED YET >>>');
+        setInitializing(false);
       }
     } catch (error) {
       console.log('Erreur de stockage:', error);
     }
   };
 
-
+console.log('userFinded', userFinded);
 
 
 

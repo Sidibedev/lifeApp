@@ -347,7 +347,7 @@ const HomeScreen = (props) => {
             </TouchableOpacity>
 
             <Notification title={'Release'} content={'Nos prochaines releases vous réservent pleins de surprises🔥.'} color={'#9D9D9D'} icon={"aperture"} />
-            <Toast ref={(ref) => Toast.setRef(ref)} />
+            <Toast />
           </View>
 
         </Modal>
@@ -461,7 +461,7 @@ const HomeScreen = (props) => {
 
         {/** Point Clé */}
         <View style={styles.pointCle}>
-          <HeaderSection title={'Points clés'} haveicon='false' onpress={() => navigation.navigate('Constantes')} icon={'refresh'} />
+          <HeaderSection title={'Points clés'} haveicon='false' icon={'refresh'} />
 
           <View style={styles.boxContainerPc}>
             <BigBox icon={'water'} title={'Eau'} percentage={0} colorIcon={"#75E4F9"} measure={'Verre'} />
@@ -528,7 +528,7 @@ Conclusion:
 
 
       </ScrollView>
-      <Toast ref={(ref) => Toast.setRef(ref)} />
+      <Toast/>
     </View>
   )
 }
@@ -813,13 +813,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  modalText6: {
-    marginLeft: -40,
-    marginBottom: 20,
-    color: 'black',
-    fontSize: 25,
-    fontWeight: "bold",
-  },
 
   row: {
     flexDirection: 'row',
@@ -896,8 +889,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
 
   modalBox3: {
@@ -906,8 +897,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     padding: 10,
     elevation: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
@@ -921,8 +910,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 10,
     elevation: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
