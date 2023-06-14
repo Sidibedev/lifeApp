@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, Platform } from 'react-native';
-import React from 'react'
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, Platform,ActivityIndicator } from 'react-native';
+import React, {useState} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -8,11 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WelcomeScreen = (props) => {
   const navigation = useNavigation();
-  
-  //Simple redirect to HomeScreen
-  const simpleedirect = () => {
-    navigation.navigate('Home');
-  }
+  const [isLoading, setIsLoading] = useState(false); // État pour contrôler l'affichage de l'écran de chargement
 
 
   // Note à Abou : 
@@ -23,15 +19,34 @@ const WelcomeScreen = (props) => {
   const handleSignIn = async () => {
    const user = await props.signIn();
     if (user) { 
+      console.log(user);
       const data = await props.connectToGoogleFit();
       if (data) {
-        await AsyncStorage.setItem('user', JSON.stringify(user));
         await AsyncStorage.setItem('data', JSON.stringify(data));
+        console.log(data);
+        setIsLoading(false); // Désactiver l'écran de chargement
+      // Enregistrer les données utilisateur dans AsyncStorage
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      console.log(user);
+
         // redict to HomeScreen avec les données de l'utilisateur en props
         navigation.navigate('Home');
       }
     }
   }
+
+
+  const renderLoadingScreen = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
+    }
+    return null;
+  };
+
 
 
 
@@ -53,11 +68,26 @@ const WelcomeScreen = (props) => {
         </View>
         <Text style={styles.footer}>© 2023 - Lifes Bêta</Text>
       </View>
+
+
+      {renderLoadingScreen()}
+
     </ImageBackground>
   )
 }
 
 const styles = StyleSheet.create({
+
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Couleur de fond semi-transparente
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   container: {
     flex: 1,

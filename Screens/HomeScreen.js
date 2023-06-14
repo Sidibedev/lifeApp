@@ -310,7 +310,7 @@ const HomeScreen = (props) => {
               </View>
 
               <View style={styles.column}>
-                <TouchableOpacity onPress={()=>signOut} style={styles.profilButton}>
+                <TouchableOpacity onPress={()=>handleSignOut()} style={styles.profilButton}>
                   <Text >Déconnexion</Text>
                 </TouchableOpacity>
 
@@ -369,10 +369,10 @@ const HomeScreen = (props) => {
           <HeaderSection title={'Points clés'} haveicon='false' onpress={() => navigation.navigate('Constantes')} icon={'refresh'} />
 
           <View style={styles.boxContainerPc}>
-            <BigBox icon={'water'} title={'Eau'} percentage={40} colorIcon={"#75E4F9"} measure={'Verre'} />
-            <BigBox icon={'bed'} title={'sommeil'} percentage={70} colorIcon={"orange"} measure={'Heures'} />
+            <BigBox icon={'water'} title={'Eau'} percentage={0} colorIcon={"#75E4F9"} measure={'Verre'} />
+            <BigBox icon={'bed'} title={'sommeil'} percentage={0} colorIcon={"orange"} measure={'Heures'} />
             <BigBox icon={'bicycle-outline'} title={'Sport'} percentage={0} colorIcon={"green"} measure={'Minutes'} />
-            <BigBox icon={'medical'} title={'Medocs'} percentage={70} colorIcon={"pink"} measure={'prise VO'} disabled={true} onBoxPress={handleSubscriptionModal} />
+            <BigBox icon={'medical'} title={'Medocs'} percentage={0} colorIcon={"pink"} measure={'prise VO'} disabled={true} onBoxPress={handleSubscriptionModal} />
 
           </View>
         </View>
