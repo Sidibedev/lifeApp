@@ -1,7 +1,7 @@
 {
   "expo": {
     "splash": {
-      "image": "./assets/SplashScreen",
+      "image": "./assets/SplashScreen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -12,11 +12,20 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "runtimeVersion": {
+      "policy": "nativeVersion"
+    },
     "extra": {
       "eas": {
         "projectId": "a567befe-0bfe-487c-b1aa-5f0e0fe82347"
       }
     },
-    "owner": "jusoleil"
+    "owner": "jusoleil",
+    "android": {
+      "package": "com.jusoleil.lifeApp"
+    },
+    "ios": {
+      "bundleIdentifier": "com.jusoleil.lifeApp"
+    }
   }
 }

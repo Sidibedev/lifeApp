@@ -1,4 +1,4 @@
-package com.lifeapp;
+package com.jusoleil.lifeApp;
 
 import android.os.Build;
 import android.os.Bundle;

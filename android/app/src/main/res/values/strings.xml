@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">lifeApp</string>
+  <string name="app_name">lifeApp</string>
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="expo_runtime_version">1.0.0(1)</string>
+  <!-- <string name="server_client_id">157792879449-0cadl2alnlmedi9hv1kl7ouarg2q2ass.apps.googleusercontent.com</string> -->
+  <string name="server_client_id">157792879449-n6kka0e4a5pojglgepasnkccag6s6vm3.apps.googleusercontent.com</string>
 </resources>
